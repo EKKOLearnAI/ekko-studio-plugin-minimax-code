@@ -134,6 +134,19 @@ const cancelled = { outcome: { outcome: 'cancelled' } }
 const selected = optionId => ({ outcome: { outcome: 'selected', optionId } })
 function validId(id) { return typeof id === 'string' && id.length > 0 && id.length <= 512 }
 
+function nativeUsage(summary) {
+  const count = label => {
+    const match = new RegExp('^' + label + ': ([0-9,]+)$', 'm').exec(summary)
+    if (!match) return
+    const value = Number(match[1].replaceAll(',', ''))
+    if (Number.isSafeInteger(value) && value >= 0) return value
+  }
+  const input = count('Input tokens'), output = count('Output tokens')
+  const read = count('Cache read tokens') ?? 0, write = count('Cache write tokens') ?? 0
+  if (input == null || output == null || input + output + read + write === 0) return
+  return { inputTokens: input + write, outputTokens: output, cacheReadTokens: read, isEstimated: false }
+}
+
 async function requestPermission(params, run, signal) {
   const tool = params.toolCall
   if (!validId(tool?.toolCallId) || !Array.isArray(params.options) || signal.aborted) return cancelled
@@ -230,6 +243,9 @@ export function createMiniMaxSession(owner, session, supportsResume = false, sel
     let nativeId
     let canCloseSession = false
     let prompting = false
+    let usageSessionId
+    let readingUsage = false
+    let usageText = ''
     let updates = Promise.resolve()
     let updateError
     const interruption = Promise.withResolvers()
@@ -247,6 +263,15 @@ export function createMiniMaxSession(owner, session, supportsResume = false, sel
             .then(response => acp.respond(id, activeSignal.aborted ? cancelled : response))
             .catch(() => {})
         }
+      } else if (method === 'session/update' && params?.update?.sessionUpdate === 'available_commands_update') {
+        if (Array.isArray(params.update.availableCommands) && params.update.availableCommands.some(command => command?.name === 'usage')) {
+          usageSessionId = params.sessionId
+        }
+      } else if (readingUsage && method === 'session/update' && params?.sessionId === nativeId) {
+        const { sessionUpdate, content } = params.update ?? {}
+        if (sessionUpdate === 'agent_message_chunk' && content?.type === 'text' && typeof content.text === 'string') {
+          usageText = (usageText + content.text).slice(0, 8192)
+        }
       } else if (current && method === 'session/update') {
         updates = updates.then(async () => {
           if (!activeSignal.aborted && !updateError) await turn.update(params.update)
@@ -255,8 +280,8 @@ export function createMiniMaxSession(owner, session, supportsResume = false, sel
     })
     function cancel() {
       interruption.resolve()
-      if (nativeId && prompting) acp.notify('session/cancel', { sessionId: nativeId })
-      void acp.close({ cancel: prompting })
+      if (nativeId && (prompting || readingUsage)) acp.notify('session/cancel', { sessionId: nativeId })
+      void acp.close({ cancel: prompting || readingUsage })
     }
     signal.addEventListener('abort', cancel, { once: true })
     try {
@@ -294,8 +319,19 @@ export function createMiniMaxSession(owner, session, supportsResume = false, sel
       if (response?.stopReason === 'cancelled') throw new Error('MiniMax Code cancelled the prompt.')
       const finishReason = finishReasons.get(response?.stopReason)
       if (!finishReason) throw new Error('MiniMax Code returned an unsupported stop reason.')
+      let usage
+      // This advertised local command reads the native session totals without calling a model.
+      if (run.mode === 'global' && !checkpoint && usageSessionId === nativeId) {
+        readingUsage = true
+        try {
+          const usageSignal = AbortSignal.any([signal, AbortSignal.timeout(2000)])
+          const status = await acp.request('session/prompt', { sessionId: nativeId, prompt: [text('/usage')] }, usageSignal)
+          if (status?.stopReason === 'end_turn') usage = nativeUsage(usageText)
+        } catch { signal.throwIfAborted() }
+        finally { readingUsage = false }
+      }
       if (supportsResume) checkpoint = validateModel(contract, 'nativeSession', { nativeId, binding })
-      return { content: [text(turn.answer)], finishReason }
+      return { content: [text(turn.answer)], finishReason, ...(usage ? { usage } : {}) }
     } catch (error) {
       if (signal.aborted) throw new Error(deadline.aborted ? 'MiniMax Code turn timed out.' : 'MiniMax Code turn cancelled.')
       if (error instanceof AcpError && error.code === -32000) {

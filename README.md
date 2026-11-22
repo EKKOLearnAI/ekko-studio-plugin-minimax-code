@@ -25,6 +25,7 @@ Changes apply when Studio starts the next ACP turn. Workspace, built-in and nati
 ## Support and acceptance
 
 - Global mode exposes the CLI’s native default model and reasoning settings. Scoped mode routes model calls through Studio’s Chat Completions proxy and checks the native ACP selection before prompting.
+- Global mode reports usage from the native session’s advertised local `/usage` command. Scoped usage is recorded by Studio’s model proxy.
 - Text and authorized workspace paths pass to ACP. Images use PNG, JPEG, WebP or GIF, with up to ten images and 8 MiB total per turn. The chosen model must accept images. Files pass as ACP file resource links so the engine can read them under its native file and workspace permissions.
 - Studio supplies MCP transports for the current run. MiniMax Code’s own configured skills, MCP servers, and tool rules also apply.
 - Each registered turn uses a fresh ACP session and includes Studio history. The native `session/load` candidate is covered by tests. Studio resume is disabled pending a live authenticated host-restart check. Group chat, workflow and API surfaces await acceptance.

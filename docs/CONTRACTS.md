@@ -16,6 +16,8 @@ The prompt contains instructions, prior messages for a fresh native session, cur
 
 Cancel, timeout and dispose signal the active native prompt and release the ACP process. Clean completion also requests ACP session close when advertised. Native model session records belong to MiniMax Code.
 
+After a fresh global turn, the adapter queries the advertised local `/usage` command. Its output stays out of the Studio transcript. Counts are returned with the Agent result, with cache writes included in input and cached reads reported separately. Scoped requests are measured by the Studio proxy.
+
 ## Candidate checkpoint
 
 `contracts/plugin.json` defines schema version 1. `nativeId` is the opaque native session ID. `binding` hashes the Studio account, Profile, Agent ID, conversation, mode, canonical workspace, and CLI data directory. A mismatched binding or unsupported schema fails before session load. Checkpoints contain no credential material, model payloads or ACP transcripts.

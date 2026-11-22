@@ -41,7 +41,7 @@ test('official CLI checks an empty profile, streams text and attachments, and re
     requests.push(body)
     const content = JSON.stringify(body.messages).includes('second-native-marker') ? 'second native answer' : 'first native answer'
     const common = { id: 'completion-local', created: 1, model }
-    const usage = { prompt_tokens: 20, completion_tokens: 3, total_tokens: 23 }
+    const usage = { prompt_tokens: 20, completion_tokens: 3, total_tokens: 23, prompt_tokens_details: { cached_tokens: 4 } }
     if (!body.stream) {
       res.writeHead(200, { 'Content-Type': 'application/json' })
       res.end(JSON.stringify({ ...common, usage, object: 'chat.completion', choices: [
@@ -53,6 +53,7 @@ test('official CLI checks an empty profile, streams text and attachments, and re
     const write = choice => res.write(`data: ${JSON.stringify({ ...common, object: 'chat.completion.chunk', choices: [{ index: 0, ...choice }] })}\n\n`)
     write({ delta: { role: 'assistant', content }, finish_reason: null })
     write({ delta: {}, finish_reason: 'stop' })
+    res.write(`data: ${JSON.stringify({ ...common, object: 'chat.completion.chunk', choices: [], usage })}\n\n`)
     res.end('data: [DONE]\n\n')
   }).listen(0, '127.0.0.1')
   await once(server, 'listening')
@@ -80,6 +81,7 @@ test('official CLI checks an empty profile, streams text and attachments, and re
   firstRequest.input.push({ type: 'file', assetId: 'file' }, { type: 'image', assetId: 'image' })
   assert.deepEqual(await first.run(firstRequest, { ...run, deadlineAt: Date.now() + 25_000 }), {
     content: [message('first native answer')], finishReason: 'stop',
+    usage: { inputTokens: 16, outputTokens: 3, cacheReadTokens: 4, isEstimated: false },
   })
   const saved = JSON.parse(JSON.stringify(await first.checkpoint()))
   assert.ok(saved.data.nativeId)
@@ -123,6 +125,7 @@ test('scoped mode uses the selected Studio model through a private relay without
     assert.equal(req.url, '/studio/v1/chat/completions')
     assert.equal(req.headers.authorization, `Bearer ${token}`)
     assert.equal(body.model, model)
+    assert.equal(body.stream_options?.include_usage, true)
     promptReceived ||= JSON.stringify(body.messages).includes('scoped-turn-marker')
     const base = { id: 'scoped-test', created: 1, model, object: 'chat.completion.chunk' }
     res.writeHead(200, { 'Content-Type': 'text/event-stream' })
