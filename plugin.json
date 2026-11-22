@@ -1,0 +1,153 @@
+{
+  "id": "minimax-code",
+  "name": "MiniMax Code",
+  "description": "Use MiniMax Code chat with the CLI’s native authentication.",
+  "i18n": {
+    "en": {
+      "name": "MiniMax Code",
+      "description": "Use MiniMax Code chat with the CLI’s native authentication.",
+      "views": {
+        "skills": "Skills",
+        "mcp": "MCP servers",
+        "settings": "Configuration"
+      }
+    },
+    "zh": {
+      "name": "MiniMax Code",
+      "description": "使用 CLI 的原生认证在 Studio 中与 MiniMax Code 对话。",
+      "views": {
+        "skills": "Skill 管理",
+        "mcp": "MCP 管理",
+        "settings": "配置编辑"
+      }
+    },
+    "zh-TW": {
+      "name": "MiniMax Code",
+      "description": "使用 CLI 的原生驗證在 Studio 中與 MiniMax Code 對話。",
+      "views": {
+        "skills": "Skill 管理",
+        "mcp": "MCP 管理",
+        "settings": "設定編輯"
+      }
+    },
+    "ja": {
+      "name": "MiniMax Code",
+      "description": "CLI のネイティブ認証で Studio から MiniMax Code とチャットします。",
+      "views": {
+        "skills": "スキル",
+        "mcp": "MCP サーバー",
+        "settings": "設定"
+      }
+    },
+    "ko": {
+      "name": "MiniMax Code",
+      "description": "CLI의 기본 인증을 사용하여 Studio에서 MiniMax Code와 대화합니다.",
+      "views": {
+        "skills": "스킬",
+        "mcp": "MCP 서버",
+        "settings": "설정"
+      }
+    },
+    "fr": {
+      "name": "MiniMax Code",
+      "description": "Discutez avec MiniMax Code dans Studio via l’authentification native du CLI.",
+      "views": {
+        "skills": "Compétences",
+        "mcp": "Serveurs MCP",
+        "settings": "Configuration"
+      }
+    },
+    "es": {
+      "name": "MiniMax Code",
+      "description": "Chatea con MiniMax Code en Studio mediante la autenticación nativa de la CLI.",
+      "views": {
+        "skills": "Habilidades",
+        "mcp": "Servidores MCP",
+        "settings": "Configuración"
+      }
+    },
+    "de": {
+      "name": "MiniMax Code",
+      "description": "Chatte in Studio mit MiniMax Code über die native CLI-Anmeldung.",
+      "views": {
+        "skills": "Skills",
+        "mcp": "MCP-Server",
+        "settings": "Konfiguration"
+      }
+    },
+    "pt": {
+      "name": "MiniMax Code",
+      "description": "Converse com o MiniMax Code no Studio usando a autenticação nativa da CLI.",
+      "views": {
+        "skills": "Habilidades",
+        "mcp": "Servidores MCP",
+        "settings": "Configuração"
+      }
+    },
+    "ru": {
+      "name": "MiniMax Code",
+      "description": "Общайтесь с MiniMax Code в Studio со встроенной аутентификацией CLI.",
+      "views": {
+        "skills": "Навыки",
+        "mcp": "Серверы MCP",
+        "settings": "Настройки"
+      }
+    },
+    "ar": {
+      "name": "MiniMax Code",
+      "description": "استخدم مصادقة واجهة سطر الأوامر الأصلية للدردشة مع MiniMax Code في Studio.",
+      "views": {
+        "skills": "المهارات",
+        "mcp": "خوادم MCP",
+        "settings": "الإعدادات"
+      }
+    },
+    "tr": {
+      "name": "MiniMax Code",
+      "description": "CLI’nin yerleşik kimlik doğrulamasıyla Studio’da MiniMax Code ile sohbet edin.",
+      "views": {
+        "skills": "Beceriler",
+        "mcp": "MCP sunucuları",
+        "settings": "Yapılandırma"
+      }
+    }
+  },
+  "version": "0.2.1",
+  "apiVersion": 1,
+  "server": "server.mjs",
+  "permissions": [
+    "agents",
+    "ui"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "Ekko Studio"
+  },
+  "documentation": "https://github.com/MiniMax-AI/minimax-code/blob/main/docs/installation.md",
+  "client": "client.mjs",
+  "views": [
+    {
+      "id": "skills",
+      "title": "Skills",
+      "slot": "agent-settings",
+      "icon": "skills",
+      "order": 0
+    },
+    {
+      "id": "mcp",
+      "title": "MCP servers",
+      "slot": "agent-settings",
+      "icon": "mcp",
+      "order": 1
+    },
+    {
+      "id": "settings",
+      "title": "Configuration",
+      "slot": "agent-settings",
+      "icon": "settings",
+      "order": 2
+    }
+  ],
+  "icon": "icon.png",
+  "repository": "https://github.com/EKKOLearnAI/ekko-studio-plugin-minimax-code"
+}

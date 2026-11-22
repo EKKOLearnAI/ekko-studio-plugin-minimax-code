@@ -1,0 +1,599 @@
+{
+  "schemaVersion": 1,
+  "description": "MiniMax Code Agent API v1, native configuration management and ACP checkpoint.",
+  "models": {
+    "nativeSession": {
+      "type": "object",
+      "description": "A completed native session and the binding of its owner, Studio session, workspace and CLI data directory.",
+      "properties": {
+        "nativeId": {
+          "type": "string",
+          "description": "Opaque ACP session identifier returned by session/new.",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "binding": {
+          "type": "string",
+          "description": "SHA-256 of the account, Profile, Agent, Studio session, mode, canonical workspace and native data directory.",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "nativeId",
+        "binding"
+      ],
+      "additionalProperties": false
+    },
+    "empty": {
+      "type": "object",
+      "description": "Request with no parameters.",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "name": {
+      "type": "object",
+      "description": "Select a native Skill.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Native skill directory or MCP server name.",
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "ack": {
+      "type": "object",
+      "description": "Successful mutation.",
+      "properties": {
+        "ok": {
+          "type": "boolean",
+          "description": "True after the write completes.",
+          "enum": [
+            true
+          ]
+        }
+      },
+      "required": [
+        "ok"
+      ],
+      "additionalProperties": false
+    },
+    "resourceRevision": {
+      "type": "object",
+      "description": "Remove a single resource after checking its revision.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Native skill directory or MCP server name.",
+          "maxLength": 128
+        },
+        "revision": {
+          "type": "string",
+          "description": "Opaque SHA-256 of the last read item; empty for new items or missing entries.",
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "name",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "skillList": {
+      "type": "object",
+      "description": "User-level MiniMax Code Skills.",
+      "properties": {
+        "directory": {
+          "type": "string",
+          "description": "Absolute native Skill root.",
+          "maxLength": 4096
+        },
+        "items": {
+          "type": "array",
+          "description": "Skill summaries.",
+          "items": {
+            "type": "object",
+            "description": "Skill file summary.",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Native skill directory or MCP server name.",
+                "maxLength": 128
+              },
+              "description": {
+                "type": "string",
+                "description": "Skill frontmatter description.",
+                "maxLength": 2000
+              },
+              "enabled": {
+                "type": "boolean",
+                "description": "Whether MiniMax Code should discover this resource."
+              },
+              "readOnly": {
+                "type": "boolean",
+                "description": "Linked or conflicting Skill files cannot be edited."
+              }
+            },
+            "required": [
+              "name",
+              "description",
+              "enabled",
+              "readOnly"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "directory",
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    "skill": {
+      "type": "object",
+      "description": "Editable or new native Skill document.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Native skill directory or MCP server name.",
+          "maxLength": 128
+        },
+        "markdown": {
+          "type": "string",
+          "description": "Complete SKILL.md, including its native YAML frontmatter.",
+          "maxLength": 1048576
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether MiniMax Code should discover this resource."
+        },
+        "revision": {
+          "type": "string",
+          "description": "Opaque SHA-256 of the last read item; empty for new items or missing entries.",
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "name",
+        "markdown",
+        "enabled",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "mcpServer": {
+      "type": "object",
+      "description": "One user-level native MCP server.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Native skill directory or MCP server name.",
+          "maxLength": 128
+        },
+        "config": {
+          "type": "object",
+          "description": "Native MCP server configuration; unknown JSON fields are preserved.",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether MiniMax Code should discover this resource."
+        },
+        "revision": {
+          "type": "string",
+          "description": "Opaque SHA-256 of the last read item; empty for new items or missing entries.",
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "name",
+        "config",
+        "enabled",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "mcpList": {
+      "type": "object",
+      "description": "User-level native MCP configuration with credentials masked.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Absolute path of the native configuration file.",
+          "maxLength": 4096
+        },
+        "items": {
+          "type": "array",
+          "description": "MCP entries.",
+          "items": {
+            "type": "object",
+            "description": "Native MCP entry with masked credentials.",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Native skill directory or MCP server name.",
+                "maxLength": 128
+              },
+              "config": {
+                "type": "object",
+                "description": "Native MCP server configuration; unknown JSON fields are preserved.",
+                "properties": {},
+                "required": [],
+                "additionalProperties": true
+              },
+              "enabled": {
+                "type": "boolean",
+                "description": "Whether MiniMax Code should discover this resource."
+              },
+              "revision": {
+                "type": "string",
+                "description": "Opaque SHA-256 of the last read item; empty for new items or missing entries.",
+                "maxLength": 64
+              }
+            },
+            "required": [
+              "name",
+              "config",
+              "enabled",
+              "revision"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "path",
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    "settings": {
+      "type": "object",
+      "description": "Editable native runtime settings and file revision.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Absolute path of the native configuration file.",
+          "maxLength": 4096
+        },
+        "revision": {
+          "type": "string",
+          "description": "Opaque SHA-256 of the last read item; empty for new items or missing entries.",
+          "maxLength": 64
+        },
+        "permissionMode": {
+          "type": "string",
+          "description": "Explicitly saved native permission mode; empty if unspecified.",
+          "maxLength": 128
+        },
+        "defaultModel": {
+          "type": "string",
+          "description": "Native default model identifier (provider/model), or empty to use the native default.",
+          "maxLength": 512
+        },
+        "externalSkills": {
+          "type": "boolean",
+          "description": "Scan enabled external Skill sources."
+        },
+        "walkUp": {
+          "type": "boolean",
+          "description": "Scan parent directories for compatible workspace Skills."
+        },
+        "loginCommand": {
+          "type": "string",
+          "description": "Shell command to sign in on the Studio host through the selected CLI. Empty when an engine is unavailable.",
+          "maxLength": 16384
+        }
+      },
+      "required": [
+        "path",
+        "revision",
+        "permissionMode",
+        "defaultModel",
+        "externalSkills",
+        "walkUp",
+        "loginCommand"
+      ],
+      "additionalProperties": false
+    },
+    "settingsWrite": {
+      "type": "object",
+      "description": "Patch the supported native settings.",
+      "properties": {
+        "revision": {
+          "type": "string",
+          "description": "Opaque SHA-256 of the last read item; empty for new items or missing entries.",
+          "maxLength": 64
+        },
+        "setAsk": {
+          "type": "boolean",
+          "description": "Explicitly save the native Ask permission mode."
+        },
+        "defaultModel": {
+          "type": "string",
+          "description": "Native default model identifier (provider/model), or empty to use the native default.",
+          "maxLength": 512
+        },
+        "externalSkills": {
+          "type": "boolean",
+          "description": "Scan enabled external Skill sources."
+        },
+        "walkUp": {
+          "type": "boolean",
+          "description": "Scan parent directories for compatible workspace Skills."
+        }
+      },
+      "required": [
+        "revision",
+        "setAsk",
+        "defaultModel",
+        "externalSkills",
+        "walkUp"
+      ],
+      "additionalProperties": false
+    },
+    "skillEditor": {
+      "type": "object",
+      "description": "Edit the Markdown body and description of a native Skill with revision protection.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Native skill directory or MCP server name.",
+          "maxLength": 128
+        },
+        "revision": {
+          "type": "string",
+          "description": "Opaque SHA-256 of the last read item; empty for new items or missing entries.",
+          "maxLength": 64
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether MiniMax Code should discover this resource."
+        },
+        "description": {
+          "type": "string",
+          "description": "Native description field.",
+          "maxLength": 2000
+        },
+        "content": {
+          "type": "string",
+          "description": "Skill Markdown body.",
+          "maxLength": 200000
+        }
+      },
+      "required": [
+        "name",
+        "revision",
+        "enabled",
+        "description",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "settingsEditorWrite": {
+      "type": "object",
+      "description": "Save native models and editable runtime settings at a specific revision.",
+      "properties": {
+        "revision": {
+          "type": "string",
+          "description": "Opaque SHA-256 of the last read item; empty for new items or missing entries.",
+          "maxLength": 64
+        },
+        "defaultModel": {
+          "type": "string",
+          "description": "Native default model identifier (provider/model), or empty to use the native default.",
+          "maxLength": 512
+        },
+        "models": {
+          "type": "object",
+          "description": "Native custom_provider and minimax_api sections with mask placeholders.",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "config": {
+          "type": "object",
+          "description": "Editable permissionMode, skills and dataContribution native sections.",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "executable": {
+          "type": "string",
+          "description": "Optional external MiniMax Code executable or JavaScript entry path. Empty uses normal engine selection.",
+          "maxLength": 4096
+        }
+      },
+      "required": [
+        "revision",
+        "defaultModel",
+        "models",
+        "config",
+        "executable"
+      ],
+      "additionalProperties": false
+    },
+    "settingsEditor": {
+      "type": "object",
+      "description": "Native settings with provider credentials masked and the active CLI status.",
+      "properties": {
+        "revision": {
+          "type": "string",
+          "description": "Opaque SHA-256 of the last read item; empty for new items or missing entries.",
+          "maxLength": 64
+        },
+        "defaultModel": {
+          "type": "string",
+          "description": "Native default model identifier (provider/model), or empty to use the native default.",
+          "maxLength": 512
+        },
+        "models": {
+          "type": "object",
+          "description": "Native custom_provider and minimax_api sections with mask placeholders.",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "config": {
+          "type": "object",
+          "description": "Editable permissionMode, skills and dataContribution native sections.",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "path": {
+          "type": "string",
+          "description": "Absolute path of the native configuration file.",
+          "maxLength": 4096
+        },
+        "loginCommand": {
+          "type": "string",
+          "description": "Shell command to sign in on the Studio host through the selected CLI. Empty when an engine is unavailable.",
+          "maxLength": 16384
+        },
+        "executable": {
+          "type": "string",
+          "description": "Optional external MiniMax Code executable or JavaScript entry path. Empty uses normal engine selection.",
+          "maxLength": 4096
+        },
+        "status": {
+          "type": "object",
+          "description": "CLI installation status.",
+          "properties": {
+            "installed": {
+              "type": "boolean",
+              "description": "Whether the CLI is installed."
+            },
+            "version": {
+              "type": "string",
+              "description": "Detected CLI version.",
+              "maxLength": 128
+            },
+            "source": {
+              "type": "string",
+              "description": "CLI installation source.",
+              "maxLength": 128
+            },
+            "error": {
+              "type": "string",
+              "description": "Actionable status error.",
+              "maxLength": 1024
+            }
+          },
+          "required": [
+            "installed",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "revision",
+        "defaultModel",
+        "models",
+        "config",
+        "path",
+        "loginCommand",
+        "executable",
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "externalExecutable": {
+      "type": "string",
+      "description": "Optional external MiniMax Code executable or JavaScript entry path. Empty uses normal engine selection.",
+      "maxLength": 4096
+    }
+  },
+  "rpc": {
+    "list-skills": {
+      "input": "empty",
+      "output": "skillList",
+      "description": "List native user-level Skills."
+    },
+    "get-skill": {
+      "input": "name",
+      "output": "skill",
+      "description": "Load one Skill for editing."
+    },
+    "save-skill": {
+      "input": "skill",
+      "output": "ack",
+      "description": "Create, edit, enable or disable an editable Skill."
+    },
+    "remove-skill": {
+      "input": "resourceRevision",
+      "output": "ack",
+      "description": "Remove the Skill document while preserving companion files."
+    },
+    "list-mcp": {
+      "input": "empty",
+      "output": "mcpList",
+      "description": "List native user-level MCP servers with credentials masked."
+    },
+    "save-mcp": {
+      "input": "mcpServer",
+      "output": "ack",
+      "description": "Save one MCP server and merge masked values from its last revision."
+    },
+    "remove-mcp": {
+      "input": "resourceRevision",
+      "output": "ack",
+      "description": "Remove one native MCP server."
+    },
+    "get-settings": {
+      "input": "empty",
+      "output": "settings",
+      "description": "Read the supported runtime settings without returning provider credentials."
+    },
+    "save-settings": {
+      "input": "settingsWrite",
+      "output": "ack",
+      "description": "Save the supported runtime settings into native config.yaml."
+    },
+    "edit-skill": {
+      "description": "Save separate Skill description and Markdown fields while retaining other frontmatter.",
+      "input": "skillEditor",
+      "output": "ack"
+    },
+    "get-settings-editor": {
+      "description": "Read the editable native configuration and current CLI status.",
+      "input": "empty",
+      "output": "settingsEditor"
+    },
+    "save-settings-editor": {
+      "description": "Update model and runtime sections of the native configuration.",
+      "input": "settingsEditorWrite",
+      "output": "ack"
+    }
+  },
+  "storage": {
+    "external-executable": {
+      "model": "externalExecutable",
+      "version": 1,
+      "scope": "Plugin-wide engine selection editable by the activating Studio account and Profile.",
+      "description": "The optional absolute path to a pre-existing MiniMax Code CLI."
+    }
+  },
+  "tools": {},
+  "commands": {},
+  "actions": {},
+  "events": {},
+  "checkpoints": {
+    "native": {
+      "description": "Candidate global-mode restart checkpoint. Published Agent capabilities keep it disabled until Studio restart acceptance.",
+      "model": "nativeSession",
+      "version": 1,
+      "scope": "Agent, user, Profile, Studio session and mode"
+    }
+  }
+}
