@@ -123,6 +123,8 @@
   "author": {
     "name": "Ekko Studio"
   },
+  "repository": "https://github.com/EKKOLearnAI/ekko-studio-plugin-minimax-code",
+  "homepage": "https://github.com/EKKOLearnAI/ekko-studio-plugin-minimax-code",
   "documentation": "https://github.com/MiniMax-AI/minimax-code/blob/main/docs/installation.md",
   "client": "client.mjs",
   "views": [
@@ -148,6 +150,5 @@
       "order": 2
     }
   ],
-  "icon": "icon.png",
-  "repository": "https://github.com/EKKOLearnAI/ekko-studio-plugin-minimax-code"
+  "icon": "icon.png"
 }
